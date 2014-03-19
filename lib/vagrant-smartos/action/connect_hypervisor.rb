@@ -15,7 +15,7 @@ module VagrantPlugins
           @stderr = []
           @stdout = []
         end
-        
+
         def append_stderr(data)
           @stderr << data
         end
@@ -35,7 +35,7 @@ module VagrantPlugins
         def initialize(net_ssh)
           @ssh = net_ssh
         end
-        
+
         UnexpectedExitCode = Class.new(RuntimeError)
         CommandExecutionFailed = Class.new(RuntimeError)
 
@@ -68,7 +68,7 @@ module VagrantPlugins
               end
             end
 
-            channel.wait            
+            channel.wait
           end
         end
       end
@@ -77,15 +77,16 @@ module VagrantPlugins
       class ConnectHypervisor
 
         def initialize(app, env)
-          @app    = app 
+          @app    = app
           @logger = Log4r::Logger.new("vagrant_smartos::action::connect_hypervisor")
         end
 
         def call(env)
 
-          username,hostname = env[:machine].provider_config.hypervisor.split("@")
+          username,hostport = env[:machine].provider_config.hypervisor.split("@")
+          hostname,port = hostport.split(":")
 
-          Net::SSH.start(hostname,username) do |ssh|
+          Net::SSH.start(hostname,username, :port => port || 22) do |ssh|
 
             env[:hyp_ssh] = ssh
             env[:hyp] = SshWrapper.new(ssh)
